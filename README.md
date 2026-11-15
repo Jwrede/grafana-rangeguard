@@ -218,9 +218,10 @@ Durations use the units `ms`, `s`, `m`, `h`, `d`, `w` and `y`.
   Prometheus data source, the data source proxy path, type lookup with a
   service account token, a public dashboard, and the Prometheus and Loki
   modes with GET, form POST, `since`, instant queries and metadata requests.
-- CI runs the end-to-end tests against the versions listed in
-  `.github/workflows/ci.yml`, and again every Monday against the `latest`
-  images.
+- CI runs the end-to-end tests against Grafana 10.4.19, 11.6.0, 12.4.15,
+  13.3.1 and `latest`, Prometheus 2.55.1, 3.5.0 and `latest`, and Loki
+  2.9.17, 3.4.6, 3.7.9 and `latest` (combinations in
+  `.github/workflows/ci.yml`), and again every Monday.
 
 ## Limits
 
