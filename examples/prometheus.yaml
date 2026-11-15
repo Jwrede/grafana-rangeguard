@@ -1,0 +1,15 @@
+# Proxy in front of a Prometheus compatible API. Point the Grafana data
+# source (and other clients) at this address instead of Prometheus.
+listen: ":9091"
+mode: prometheus
+upstream: http://127.0.0.1:9090
+
+rules:
+  # Grafana sends X-Grafana-User when send_user_header is enabled.
+  - name: capacity-team
+    match: {user: [alice, bob]}
+    max_range: 1y
+
+defaults:
+  max_range: 30d
+  max_lookback: 180d

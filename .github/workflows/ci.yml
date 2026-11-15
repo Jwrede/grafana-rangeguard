@@ -1,0 +1,41 @@
+name: ci
+on:
+  push:
+    branches: [main]
+  pull_request:
+  schedule:
+    - cron: "17 5 * * 1"
+permissions:
+  contents: read
+jobs:
+  unit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.24"
+      - run: go vet ./...
+      - run: go test -race -count=1 ./...
+      - run: go build -o grafana-rangeguard . && ./grafana-rangeguard check -config examples/grafana.yaml
+  e2e:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - {grafana: "grafana/grafana:latest", prom: "prom/prometheus:latest", loki: "grafana/loki:latest"}
+          - {grafana: "grafana/grafana:13.3.1", prom: "prom/prometheus:v3.5.0", loki: "grafana/loki:3.7.9"}
+          - {grafana: "grafana/grafana:12.4.15", prom: "prom/prometheus:v2.55.1", loki: "grafana/loki:3.4.6"}
+          - {grafana: "grafana/grafana:11.6.0", prom: "prom/prometheus:v2.55.1", loki: "grafana/loki:2.9.17"}
+          - {grafana: "grafana/grafana:10.4.19", prom: "prom/prometheus:v2.55.1", loki: "grafana/loki:2.9.17"}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.24"
+      - run: e2e/run.sh
+        env:
+          GRAFANA_IMAGE: ${{ matrix.grafana }}
+          PROM_IMAGE: ${{ matrix.prom }}
+          LOKI_IMAGE: ${{ matrix.loki }}

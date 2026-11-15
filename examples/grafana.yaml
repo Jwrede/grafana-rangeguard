@@ -1,0 +1,41 @@
+# Proxy in front of Grafana. Users open this address instead of Grafana.
+listen: ":3001"
+metrics_listen: "127.0.0.1:9311"
+mode: grafana
+upstream: http://127.0.0.1:3000
+
+# Optional. With a token the data source type is looked up in Grafana
+# instead of being read from the request. The token must be allowed to
+# list data sources.
+# grafana_token: ${GRAFANA_TOKEN}
+
+# Log and count what would happen without changing any request.
+dry_run: false
+
+# The first matching rule applies. A rule without limits is an exemption.
+rules:
+  - name: admins
+    match: {role: [Admin]}
+
+  - name: public-dashboards
+    match: {role: [public]}
+    max_range: 7d
+
+  - name: capacity-board
+    match: {dashboard_uid: [capacity-planning]}
+    max_range: 1y
+
+  - name: logs
+    match: {datasource_type: [loki, elasticsearch]}
+    max_range: 24h
+    max_lookback: 30d
+    action: reject
+
+  - name: viewers
+    match: {role: [Viewer, anonymous]}
+    max_range: 30d
+    max_lookback: 400d
+
+defaults:
+  max_range: 90d
+  action: clamp
